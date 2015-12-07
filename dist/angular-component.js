@@ -45,7 +45,7 @@
             true :
             options.bindings
           ),
-          bindToController: true,
+          bindToController: !!options.bindings,
           restrict: options.restrict || 'E'
         };
 
