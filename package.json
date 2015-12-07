@@ -1,0 +1,18 @@
+{
+  "name": "angular-component",
+  "version": "0.0.1",
+  "description": "Add .component() support for Angular 1.2+",
+  "author": "@toddmotto",
+  "license": "MIT",
+  "homepage": "https://github.com/toddmotto/angular-component",
+  "devDependencies": {
+    "gulp": "~3.7.0",
+    "gulp-uglify": "~0.3.0",
+    "gulp-rename": "~1.1.0",
+    "gulp-clean": "^0.2.4",
+    "gulp-plumber": "~0.6.2",
+    "gulp-header": "^1.0.2",
+    "gulp-jshint": "^1.6.1",
+    "jshint-stylish": "^0.2.0"
+  }
+}
