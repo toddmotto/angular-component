@@ -43,7 +43,7 @@
           scope: (
             options.isolate === false ?
             true :
-            angular.extend({}, options.bindings)
+            options.bindings
           ),
           bindToController: true,
           restrict: options.restrict || 'E'
