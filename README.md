@@ -52,6 +52,12 @@ angular
 </script>
 ```
 
+## Installing with NPM
+
+```
+npm install --save toddmotto/angular-component
+```
+
 ## Installing with Bower
 
 ```
