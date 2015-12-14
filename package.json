@@ -1,6 +1,7 @@
 {
   "name": "angular-component",
   "version": "0.0.1",
+  "main": "./dist/angular-component.min.js",
   "description": "Add .component() support for Angular 1.2+",
   "author": "@toddmotto",
   "license": "MIT",
