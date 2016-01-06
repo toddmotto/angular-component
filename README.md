@@ -55,7 +55,7 @@ angular
 ## Installing with NPM
 
 ```
-npm install --save toddmotto/angular-component
+npm install --save angular-component
 ```
 
 ## Installing with Bower
