@@ -13,6 +13,8 @@
   function module() {
 
     var hijacked = ng.apply(this, arguments);
+    
+    if (angular.isDefined(hijacked.component)) return hijacked;
 
     function component(name, options) {
 
