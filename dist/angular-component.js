@@ -38,13 +38,13 @@
 
         return {
           controller: options.controller || angular.noop,
-          controllerAs: identifierForController(options.controller) || options.controllerAs || name,
+          controllerAs: identifierForController(options.controller) || options.controllerAs || '$ctrl',
           template: makeInjectable(
             !options.template && !options.templateUrl ? '' : options.template
           ),
           templateUrl: makeInjectable(options.templateUrl),
           transclude: options.transclude === undefined ? true : options.transclude,
-          scope: (options.isolate === false ? true : (options.bindings || {})),
+          scope: {},
           bindToController: !!options.bindings,
           restrict: options.restrict || 'E'
         };
