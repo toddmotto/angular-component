@@ -39,11 +39,7 @@
           ),
           templateUrl: makeInjectable(options.templateUrl),
           transclude: options.transclude === undefined ? true : options.transclude,
-          scope: (
-            options.isolate === false ?
-            true :
-            options.bindings
-          ),
+          scope: (options.isolate === false ? true : (options.bindings || {})),
           bindToController: !!options.bindings,
           restrict: options.restrict || 'E'
         };

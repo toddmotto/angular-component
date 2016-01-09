@@ -81,5 +81,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release history
 
+- 0.0.2
+  - Bugfix isolate scope when `bindings` is omitted
 - 0.0.1
   - Initial release
