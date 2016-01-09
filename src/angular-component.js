@@ -14,6 +14,10 @@
 
     var hijacked = ng.apply(this, arguments);
 
+    if (hijacked.component) {
+      return hijacked;
+    }
+
     function component(name, options) {
 
       function factory($injector) {

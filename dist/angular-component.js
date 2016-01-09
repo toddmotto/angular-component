@@ -1,4 +1,4 @@
-/*! angular-component v0.0.1 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
+/*! angular-component v0.0.2 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 (function () {
 
   var ng = angular.module;
@@ -14,6 +14,10 @@
   function module() {
 
     var hijacked = ng.apply(this, arguments);
+
+    if (hijacked.component) {
+      return hijacked;
+    }
 
     function component(name, options) {
 

@@ -82,6 +82,6 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 ## Release history
 
 - 0.0.2
-  - Bugfix isolate scope when `bindings` is omitted
+  - Bugfix isolate scope when `bindings` is omitted, short-circuit if .component() is already supported
 - 0.0.1
   - Initial release
