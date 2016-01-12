@@ -1,4 +1,4 @@
-/*! angular-component v0.0.2 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
+/*! angular-component v0.0.3 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 (function () {
 
   var ng = angular.module;
@@ -44,7 +44,7 @@
           ),
           templateUrl: makeInjectable(options.templateUrl),
           transclude: options.transclude === undefined ? true : options.transclude,
-          scope: (options.isolate === false ? true : (options.bindings || {})),
+          scope: options.bindings || {},
           bindToController: !!options.bindings,
           restrict: options.restrict || 'E'
         };
