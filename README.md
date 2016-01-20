@@ -82,7 +82,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 ## Release history
 
 - 0.0.4
-  - Fix Array dependency annotations (#11)
+  - Fix Array dependency annotations [#11](https://github.com/toddmotto/angular-component/issues/11)
 - 0.0.3
   - Fix bug caused by bugfix (aligns with new 1.5 changes)
 - 0.0.2
