@@ -23,13 +23,16 @@
       function factory($injector) {
 
         function makeInjectable(fn) {
-          if (angular.isFunction(fn)) {
-            return function (tElement, tAttrs) {
+          var closure;
+          if (angular.isFunction(fn) || angular.isArray(fn)) {
+            closure = function closure(tElement, tAttrs) {
               return $injector.invoke(fn, this, {
                 $element: tElement,
                 $attrs: tAttrs
               });
             };
+            closure.$inject = ['$element', '$attrs'];
+            return closure;
           } else {
             return fn;
           }

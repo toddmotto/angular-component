@@ -1,4 +1,4 @@
-/*! angular-component v0.0.3 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
+/*! angular-component v0.0.4 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 (function () {
 
   var ng = angular.module;
@@ -24,13 +24,16 @@
       function factory($injector) {
 
         function makeInjectable(fn) {
-          if (angular.isFunction(fn)) {
-            return function (tElement, tAttrs) {
+          var closure;
+          if (angular.isFunction(fn) || angular.isArray(fn)) {
+            closure = function closure(tElement, tAttrs) {
               return $injector.invoke(fn, this, {
                 $element: tElement,
                 $attrs: tAttrs
               });
             };
+            closure.$inject = ['$element', '$attrs'];
+            return closure;
           } else {
             return fn;
           }
