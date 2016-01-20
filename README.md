@@ -81,6 +81,8 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release history
 
+- 0.0.6
+  - Add automated `$` prefixed properties to factory Object
 - 0.0.5
   - Add automatic function annotations
 - 0.0.4

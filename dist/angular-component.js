@@ -1,4 +1,4 @@
-/*! angular-component v0.0.5 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
+/*! angular-component v0.0.6 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 (function () {
 
   var ng = angular.module;
@@ -57,12 +57,10 @@
 
       }
 
-      if (options.$canActivate) {
-        factory.$canActivate = options.$canActivate;
-      }
-
-      if (options.$routeConfig) {
-        factory.$routeConfig = options.$routeConfig;
+      for (var key in options) {
+        if (key.charAt(0) === '$') {
+          factory[key] = options[key];
+        }
       }
 
       factory.$inject = ['$injector'];

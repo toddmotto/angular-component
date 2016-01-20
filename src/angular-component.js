@@ -56,12 +56,10 @@
 
       }
 
-      if (options.$canActivate) {
-        factory.$canActivate = options.$canActivate;
-      }
-
-      if (options.$routeConfig) {
-        factory.$routeConfig = options.$routeConfig;
+      for (var key in options) {
+        if (key.charAt(0) === '$') {
+          factory[key] = options[key];
+        }
       }
 
       factory.$inject = ['$injector'];
