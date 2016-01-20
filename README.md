@@ -81,6 +81,8 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release history
 
+- 0.0.5
+  - Add automatic function annotations
 - 0.0.4
   - Fix Array dependency annotations [#11](https://github.com/toddmotto/angular-component/issues/11)
 - 0.0.3
