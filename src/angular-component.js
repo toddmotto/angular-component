@@ -48,10 +48,11 @@
             !options.template && !options.templateUrl ? '' : options.template
           ),
           templateUrl: makeInjectable(options.templateUrl),
-          transclude: options.transclude === undefined ? true : options.transclude,
+          transclude: options.transclude,
           scope: options.bindings || {},
           bindToController: !!options.bindings,
-          restrict: options.restrict || 'E'
+          restrict: 'E',
+          require: options.require
         };
 
       }

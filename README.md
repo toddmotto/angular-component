@@ -81,6 +81,8 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release history
 
+- 0.0.7
+  - Add `require` property from 1.5 stable, `restrict: 'E'` as default
 - 0.0.6
   - Add automated `$` prefixed properties to factory Object
 - 0.0.5

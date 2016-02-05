@@ -1,4 +1,4 @@
-/*! angular-component v0.0.6 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
+/*! angular-component v0.0.7 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 (function () {
 
   var ng = angular.module;
@@ -49,10 +49,11 @@
             !options.template && !options.templateUrl ? '' : options.template
           ),
           templateUrl: makeInjectable(options.templateUrl),
-          transclude: options.transclude === undefined ? true : options.transclude,
+          transclude: options.transclude,
           scope: options.bindings || {},
           bindToController: !!options.bindings,
-          restrict: options.restrict || 'E'
+          restrict: 'E',
+          require: options.require
         };
 
       }
