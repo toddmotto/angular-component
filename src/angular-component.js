@@ -41,6 +41,34 @@
           }
         }
 
+        if (options.bindings) {
+          var props = [];
+          angular.forEach(options.bindings, function(binding, compPropName){
+            var matchRE = binding.match(/^<(.*)/);
+            var propName = matchRE && matchRE[1] ? matchRE[1] : compPropName;
+
+            if (matchRE) {
+              // use the function binding syntax to simulate one way binding
+              options.bindings[compPropName] = '&' + propName;
+
+              props.push(compPropName);
+
+            }
+          });
+
+          var ctrlFn = options.controller;
+          options.controller = function() {
+            var ctrl = this;
+
+            // invoke function to set property
+            angular.forEach(props, function(prop){
+              ctrl[prop] = ctrl[prop]();
+            });
+
+            return ctrlFn();
+          };
+        }
+
         return {
           controller: options.controller || angular.noop,
           controllerAs: identifierForController(options.controller) || options.controllerAs || '$ctrl',
