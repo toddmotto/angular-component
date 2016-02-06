@@ -29,9 +29,9 @@ angular
       return [
         '<div class="counter">',
           '<p>Counter component</p>',
-          '<input type="text" ng-model="counter.count">',
-          '<button type="button" ng-click="counter.decrement();">-</button>',
-          '<button type="button" ng-click="counter.increment();">+</button>',
+          '<input type="text" ng-model="$ctrl.count">',
+          '<button type="button" ng-click="$ctrl.decrement();">-</button>',
+          '<button type="button" ng-click="$ctrl.increment();">+</button>',
         '</div>'
       ].join('');
     }
