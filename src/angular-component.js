@@ -51,7 +51,7 @@
           });
         } else if (angular.isArray(options.require)) {
           requires.concat[options.require];
-        } else if (options.require) {
+        } else if (options.require !== undefined) {
           requires.push(options.require);
         }
 
