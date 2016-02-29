@@ -67,16 +67,18 @@
           bindToController: !!options.bindings,
           restrict: 'E',
           require: requires,
-          link: function (scope, element, attrs, ctrls) {
-            var self = ctrls[0];
-
-            for (var i = 0; i < ctrlNames.length; i++) {
-              var ctrlName = ctrlNames[i];
-              self[ctrlName] = ctrls[i + 1];
-            }
-            
-            if (angular.isFunction(self.$onInit)) {
-              self.$onInit();
+          link: {
+            pre: function (scope, element, attrs, ctrls) {
+              var self = ctrls[0];
+  
+              for (var i = 0; i < ctrlNames.length; i++) {
+                var ctrlName = ctrlNames[i];
+                self[ctrlName] = ctrls[i + 1];
+              }
+              
+              if (angular.isFunction(self.$onInit)) {
+                self.$onInit();
+              }
             }
           }
         };
