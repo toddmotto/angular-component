@@ -26,14 +26,14 @@ angular
     },
     controller: 'CounterCtrl',
     template: function ($element, $attrs) {
-      return [
-        '<div class="counter">',
-          '<p>Counter component</p>',
-          '<input type="text" ng-model="$ctrl.count">',
-          '<button type="button" ng-click="$ctrl.decrement();">-</button>',
-          '<button type="button" ng-click="$ctrl.increment();">+</button>',
-        '</div>'
-      ].join('');
+      return `
+        <div class="counter">
+          <p>Counter component</p>
+          <input type="text" ng-model="$ctrl.count">
+          <button type="button" ng-click="$ctrl.decrement();">-</button>
+          <button type="button" ng-click="$ctrl.increment();">+</button>
+        </div>
+      `;
     }
 })
 .controller('CounterCtrl', function CounterCtrl() {
