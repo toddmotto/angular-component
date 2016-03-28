@@ -4,7 +4,7 @@ Start using `.component()` now!
 
 > [View live demo in v1.3.0](http://jsfiddle.net/toddmotto/wwzeo0sv)
 
-angular-component.js is a `<1kb` script that adds `component()` support in Angular 1.5 to all Angular versions above `1.3`, so you can begin using the new method now.
+angular-component.js is a `~1kb` script that adds `component()` support in Angular 1.5 to all Angular versions above `1.3`, so you can begin using the new method now.
 
 _Note_: you must include this script straight after `angular.js` and before your application code to ensure the `component()` method has been added to the `angular.module` global.
 
