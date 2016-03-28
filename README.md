@@ -64,6 +64,8 @@ npm install --save angular-component
 bower install https://github.com/toddmotto/angular-component.git
 ```
 
+Note: The "angular-component" name is already taken by another package in Bower, so you must install from Github. 
+
 ## Manual installation
 Ensure you're using the files from the `dist` directory (contains compiled production-ready code). Ensure you place the script before the closing `</body>` tag.
 
