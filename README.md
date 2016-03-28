@@ -55,13 +55,13 @@ angular
 ## Installing with NPM
 
 ```
-npm install --save angular-component
+npm install angular-component --save
 ```
 
 ## Installing with Bower
 
 ```
-bower install https://github.com/toddmotto/angular-component.git
+bower install angular-component.js --save
 ```
 
 ## Manual installation
