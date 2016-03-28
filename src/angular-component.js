@@ -41,6 +41,20 @@
           }
         }
 
+        var requires = [name];
+        var ctrlNames = [];
+        
+        if (angular.isObject(options.require)) {
+          angular.forEach(options.require, function (require, ctrlName) {
+            requires.push(require);
+            ctrlNames.push(ctrlName);
+          });
+        } else if (angular.isArray(options.require)) {
+          requires.concat[options.require];
+        } else if (options.require !== undefined) {
+          requires.push(options.require);
+        }
+
         return {
           controller: options.controller || angular.noop,
           controllerAs: identifierForController(options.controller) || options.controllerAs || '$ctrl',
@@ -52,9 +66,22 @@
           scope: options.bindings || {},
           bindToController: !!options.bindings,
           restrict: 'E',
-          require: options.require
+          require: requires,
+          link: {
+            pre: function (scope, element, attrs, ctrls) {
+              var self = ctrls[0];
+  
+              for (var i = 0; i < ctrlNames.length; i++) {
+                var ctrlName = ctrlNames[i];
+                self[ctrlName] = ctrls[i + 1];
+              }
+              
+              if (angular.isFunction(self.$onInit)) {
+                self.$onInit();
+              }
+            }
+          }
         };
-
       }
 
       for (var key in options) {
