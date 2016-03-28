@@ -42,6 +42,15 @@
           }
         }
 
+        var requires = [name];
+        var ctrlNames = [];
+        if (angular.isObject(options.require)) {
+          for (var prop in options.require) {
+            requires.push(options.require[prop]);
+            ctrlNames.push(prop);
+          }
+        }
+
         return {
           controller: options.controller || angular.noop,
           controllerAs: identifierForController(options.controller) || options.controllerAs || '$ctrl',
@@ -53,9 +62,30 @@
           scope: options.bindings || {},
           bindToController: !!options.bindings,
           restrict: 'E',
-          require: options.require
+          require: requires,
+          link: {
+            pre: function ($scope, $element, $attrs, $ctrls) {
+              var self = $ctrls[0];
+              for (var i = 0; i < ctrlNames.length; i++) {
+                self[ctrlNames[i]] = $ctrls[i + 1];
+              }
+              if (typeof self.$onInit === 'function') {
+                self.$onInit();
+              }
+            },
+            post: function ($scope, $element, $attrs, $ctrls) {
+              var self = $ctrls[0];
+              if (typeof self.$postLink === 'function') {
+                self.$postLink();
+              }
+              if (typeof self.$onDestroy === 'function') {
+                $scope.$on('$destroy', function () {
+                  self.$onDestroy.call(self);
+                });
+              }
+            }
+          }
         };
-
       }
 
       for (var key in options) {

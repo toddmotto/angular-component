@@ -43,16 +43,11 @@
 
         var requires = [name];
         var ctrlNames = [];
-        
         if (angular.isObject(options.require)) {
-          angular.forEach(options.require, function (require, ctrlName) {
-            requires.push(require);
-            ctrlNames.push(ctrlName);
-          });
-        } else if (angular.isArray(options.require)) {
-          requires.concat[options.require];
-        } else if (options.require !== undefined) {
-          requires.push(options.require);
+          for (var prop in options.require) {
+            requires.push(options.require[prop]);
+            ctrlNames.push(prop);
+          }
         }
 
         return {
@@ -68,16 +63,24 @@
           restrict: 'E',
           require: requires,
           link: {
-            pre: function (scope, element, attrs, ctrls) {
-              var self = ctrls[0];
-  
+            pre: function ($scope, $element, $attrs, $ctrls) {
+              var self = $ctrls[0];
               for (var i = 0; i < ctrlNames.length; i++) {
-                var ctrlName = ctrlNames[i];
-                self[ctrlName] = ctrls[i + 1];
+                self[ctrlNames[i]] = $ctrls[i + 1];
               }
-              
-              if (angular.isFunction(self.$onInit)) {
+              if (typeof self.$onInit === 'function') {
                 self.$onInit();
+              }
+            },
+            post: function ($scope, $element, $attrs, $ctrls) {
+              var self = $ctrls[0];
+              if (typeof self.$postLink === 'function') {
+                self.$postLink();
+              }
+              if (typeof self.$onDestroy === 'function') {
+                $scope.$on('$destroy', function () {
+                  self.$onDestroy.call(self);
+                });
               }
             }
           }

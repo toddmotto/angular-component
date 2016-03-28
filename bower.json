@@ -1,8 +1,27 @@
 {
-  "name": "angular-component",
-  "version": "0.0.1",
+  "name": "angular-component.js",
+  "version": "0.0.7",
   "main": "./dist/angular-component.min.js",
   "dependencies": {
     "angular": ">=1.3.0 <=1.5"
-  }
+  },
+  "homepage": "https://github.com/toddmotto/angular-component",
+  "authors": [
+    "Todd Motto <todd@toddmotto.com>"
+  ],
+  "description": "Angular component() polyfill for v1.3+",
+  "moduleType": [],
+  "keywords": [
+    "Angular",
+    "Component",
+    "Directives"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }
