@@ -1,6 +1,6 @@
 {
   "name": "angular-component",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "./dist/angular-component.min.js",
   "description": "Angular component() polyfill",
   "author": "@toddmotto",

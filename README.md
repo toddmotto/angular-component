@@ -81,6 +81,8 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release history
 
+- 0.0.8
+  - Add new lifecycle hooks ($onInit, $onDestroy, $postLink)
 - 0.0.7
   - Add `require` property from 1.5 stable, `restrict: 'E'` as default
 - 0.0.6
