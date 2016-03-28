@@ -72,16 +72,16 @@
               if (typeof self.$onInit === 'function') {
                 self.$onInit();
               }
+              if (typeof self.$onDestroy === 'function') {
+                $scope.$on('$destroy', function () {
+                  self.$onDestroy.call(self);
+                });
+              }
             },
             post: function ($scope, $element, $attrs, $ctrls) {
               var self = $ctrls[0];
               if (typeof self.$postLink === 'function') {
                 self.$postLink();
-              }
-              if (typeof self.$onDestroy === 'function') {
-                $scope.$on('$destroy', function () {
-                  self.$onDestroy.call(self);
-                });
               }
             }
           }
