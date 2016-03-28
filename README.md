@@ -1,14 +1,35 @@
 # angular-component.js
 
-Start using `component()` now!
+Start using `.component()` now!
 
 > [View live demo in v1.3.0](http://jsfiddle.net/toddmotto/wwzeo0sv)
 
 angular-component.js is a `<1kb` script that adds `component()` support in Angular 1.5 to all Angular versions above `1.3`, so you can begin using the new method now.
 
-_Note: you must include this script straight after `angular.js` and before your application code to ensure the `component()` method has been added to the `angular.module` global.
+_Note_: you must include this script straight after `angular.js` and before your application code to ensure the `component()` method has been added to the `angular.module` global.
 
 > Read about the Angular 1.5 `component()` method [here](http://toddmotto.com/exploring-the-angular-1-5-component-method)
+
+### Polyfill support
+
+This polyfill supports the following feature set of the `.component()` method:
+
+| Feature                                               | Support  |
+|-------------------------------------------------------|----------|
+| `angular.module.component()` method                   | Yes      |
+| `bindings` property                                   | Yes      |
+| `'E'` restrict default                                | Yes      |
+| `$ctrl` controllerAs default                          | Yes      |
+| `transclude` property                                 | Yes      |
+| `template` support                                    | Yes      |
+| `templateUrl` injectable for `$element` and `$attrs`  | Yes      |
+| Lifecycle hooks: `$onInit`, `$postLink`, `$onDestroy` | Yes      |
+| `require` Object for parent Component inheritance     | Yes      |
+| `$` prefixed properties such as `$canActivate`        | Yes      |
+| One-way data-binding emulated                         | No, todo |
+| `$onChanges` lifecycle hook                           | No, todo |
+
+### Component method usage
 
 ```html
 <div ng-app="app">
@@ -37,6 +58,15 @@ angular
     }
 })
 .controller('CounterCtrl', function CounterCtrl() {
+  this.$onInit = function () {
+    // component initialisation
+  };
+  this.$postLink = function () {
+    // component post-link
+  };
+  this.$onDestroy = function () {
+    // component $destroy function
+  };
   function increment() {
     this.count++;
   }
