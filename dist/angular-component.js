@@ -1,4 +1,4 @@
-/*! angular-component v0.0.8 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
+/*! angular-component v0.1.0 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 (function () {
 
   var ng = angular.module;
@@ -21,7 +21,7 @@
 
     function component(name, options) {
 
-      function factory($injector) {
+      function factory($injector, $rootScope) {
 
         function makeInjectable(fn) {
           var closure;
@@ -42,6 +42,26 @@
           }
         }
 
+        var oneTimeQueue = [];
+
+        function parseBindings(bindings) {
+          var newBindings = {};
+          for (var prop in bindings) {
+            var binding = bindings[prop];
+            if (binding.charAt(0) === '<') {
+              var value = (
+                binding.substring(1) === '' ? prop : binding.substring(1)
+              );
+              oneTimeQueue.unshift(value);
+            } else {
+              newBindings[prop] = binding;
+            }
+          }
+          return newBindings;
+        }
+
+        var modifiedBindings = parseBindings(options.bindings);
+
         var requires = [name];
         var ctrlNames = [];
         if (angular.isObject(options.require)) {
@@ -59,8 +79,8 @@
           ),
           templateUrl: makeInjectable(options.templateUrl),
           transclude: options.transclude,
-          scope: options.bindings || {},
-          bindToController: !!options.bindings,
+          scope: modifiedBindings || {},
+          bindToController: !!modifiedBindings,
           restrict: 'E',
           require: requires,
           link: {
@@ -75,6 +95,49 @@
               if (typeof self.$onDestroy === 'function') {
                 $scope.$on('$destroy', function () {
                   self.$onDestroy.call(self);
+                });
+              }
+              var changes;
+              function triggerOnChanges() {
+                self.$onChanges(changes);
+                changes = undefined;
+              }
+              function updateChangeListener(key, newValue, oldValue, flush) {
+                if (typeof self.$onChanges === 'function' && newValue !== oldValue) {
+                  if (!changes) {
+                    changes = {};
+                  }
+                  if (changes[key]) {
+                    oldValue = changes[key].currentValue;
+                  }
+                  changes[key] = {
+                    currentValue: newValue,
+                    previousValue: oldValue
+                  };
+                  if (flush) {
+                    triggerOnChanges();
+                  }
+                }
+              }
+              if (oneTimeQueue.length) {
+                var destroyQueue = [];
+                for (var q = oneTimeQueue.length; q--;) {
+                  var prop = oneTimeQueue[q];
+                  var unbindParent = $scope.$parent.$watch($attrs[prop], function (newValue, oldValue) {
+                    self[prop] = newValue;
+                    updateChangeListener(prop, newValue, oldValue, true);
+                  });
+                  $scope.$watch(function () {
+                    return self[prop];
+                  }, function (newValue, oldValue) {
+                    updateChangeListener(prop, newValue, oldValue, false);
+                  });
+                  destroyQueue.unshift(unbindParent);
+                }
+                $scope.$on('$destroy', function () {
+                  for (var i = destroyQueue.length; i--;) {
+                    destroyQueue[i]();
+                  }
                 });
               }
             },
@@ -94,7 +157,7 @@
         }
       }
 
-      factory.$inject = ['$injector'];
+      factory.$inject = ['$injector', '$rootScope'];
 
       return hijacked.directive(name, factory);
 

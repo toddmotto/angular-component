@@ -26,8 +26,8 @@ This polyfill supports the following feature set of the `.component()` method:
 | Lifecycle hooks: `$onInit`, `$postLink`, `$onDestroy` | Yes      |
 | `require` Object for parent Component inheritance     | Yes      |
 | `$` prefixed properties such as `$canActivate`        | Yes      |
-| One-way data-binding emulated                         | No, todo |
-| `$onChanges` lifecycle hook                           | No, todo |
+| One-way data-binding emulated                         | Yes      |
+| `$onChanges` lifecycle hook                           | Yes      |
 
 ### Component method usage
 
