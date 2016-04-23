@@ -127,12 +127,13 @@
                     self[prop] = newValue;
                     updateChangeListener(prop, newValue, oldValue, true);
                   });
-                  $scope.$watch(function () {
+                  destroyQueue.unshift(unbindParent);
+                  var unbindLocal = $scope.$watch(function () {
                     return self[prop];
                   }, function (newValue, oldValue) {
                     updateChangeListener(prop, newValue, oldValue, false);
                   });
-                  destroyQueue.unshift(unbindParent);
+                  destroyQueue.unshift(unbindLocal);
                 }
                 $scope.$on('$destroy', function () {
                   for (var i = destroyQueue.length; i--;) {
