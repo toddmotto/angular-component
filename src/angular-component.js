@@ -20,7 +20,7 @@
 
     function component(name, options) {
 
-      function factory($injector, $rootScope) {
+      function factory($injector) {
 
         function makeInjectable(fn) {
           var closure;
@@ -157,7 +157,7 @@
         }
       }
 
-      factory.$inject = ['$injector', '$rootScope'];
+      factory.$inject = ['$injector'];
 
       return hijacked.directive(name, factory);
 
