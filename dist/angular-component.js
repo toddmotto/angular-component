@@ -42,7 +42,7 @@
           }
         }
 
-        var oneTimeQueue = [];
+        var oneWayQueue = [];
 
         function parseBindings(bindings) {
           var newBindings = {};
@@ -52,7 +52,7 @@
               var value = (
                 binding.substring(1) === '' ? prop : binding.substring(1)
               );
-              oneTimeQueue.unshift(value);
+              oneWayQueue.unshift(value);
             } else {
               newBindings[prop] = binding;
             }
@@ -119,10 +119,10 @@
                   }
                 }
               }
-              if (oneTimeQueue.length) {
+              if (oneWayQueue.length) {
                 var destroyQueue = [];
-                for (var q = oneTimeQueue.length; q--;) {
-                  var prop = oneTimeQueue[q];
+                for (var q = oneWayQueue.length; q--;) {
+                  var prop = oneWayQueue[q];
                   var unbindParent = $scope.$parent.$watch($attrs[prop], function (newValue, oldValue) {
                     self[prop] = newValue;
                     updateChangeListener(prop, newValue, oldValue, true);
