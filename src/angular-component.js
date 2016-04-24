@@ -102,7 +102,7 @@
                 changes = undefined;
               }
               function updateChangeListener(key, newValue, oldValue, flush) {
-                if (typeof self.$onChanges === 'function' && newValue !== oldValue) {
+                if (typeof self.$onChanges === 'function') {
                   if (!changes) {
                     changes = {};
                   }
