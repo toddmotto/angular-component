@@ -1,4 +1,4 @@
-/*! angular-component v0.1.0 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
+/*! angular-component v0.1.2 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 (function () {
 
   var ng = angular.module;

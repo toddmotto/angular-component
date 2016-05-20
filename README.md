@@ -116,6 +116,11 @@ Ensure you're using the files from the `dist` directory (contains compiled produ
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using Gulp.
 
 ## Release history
+
+- 0.1.2
+  - Version fixes
+- 0.1.1
+  - Version fixes
 - 0.1.0
   - Add one-way data-binding and $onChanges lifecycle, stable release
 - 0.0.8
