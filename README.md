@@ -2,7 +2,7 @@
 
 Start using `.component()` now!
 
-> [View live demo in v1.3.0](http://jsfiddle.net/toddmotto/wwzeo0sv)
+> [View live demo in v1.3.0](https://jsfiddle.net/99zeLukc)
 
 angular-component.js is a `~1kb` script that adds `component()` support in Angular 1.5 to all Angular versions above `1.3`, so you can begin using the new method now.
 
@@ -40,45 +40,52 @@ This polyfill supports the following feature set of the `.component()` method:
 
 <script>
 angular
-.module('app', [])
-.component('counter', {
-    bindings: {
-      count: '='
-    },
-    controller: 'CounterCtrl',
-    template: function ($element, $attrs) {
-      return `
-        <div class="counter">
-          <p>Counter component</p>
-          <input type="text" ng-model="$ctrl.count">
-          <button type="button" ng-click="$ctrl.decrement();">-</button>
-          <button type="button" ng-click="$ctrl.increment();">+</button>
-        </div>
-      `;
+	.module('app', [])
+  .component('parentComponent', {
+    template: `
+      <div>
+        {{ $ctrl.user }}
+        <child-component user="$ctrl.user" on-update="$ctrl.updateUser($event);"></child-component>
+      </div>
+    `,
+    controller: function () {
+      this.user = {
+        name: 'Todd',
+        location: 'England, UK'
+      };
+      this.updateUser = function (event) {
+        this.user = event.user;
+      };
     }
-})
-.controller('CounterCtrl', function CounterCtrl() {
-  this.$onInit = function () {
-    // component initialisation
-  };
-  this.$postLink = function () {
-    // component post-link
-  };
-  this.$onDestroy = function () {
-    // component $destroy function
-  };
-  function increment() {
-    this.count++;
-  }
-  function decrement() {
-    this.count--;
-  }
-  this.increment = increment;
-  this.decrement = decrement;
-})
-.controller('MainCtrl', function MainCtrl() {
-  this.count = 4;
-});
+  })
+	.component('childComponent', {
+    bindings: {
+      user: '<',
+      onUpdate: '&'
+    },
+    controller: function () {
+    	this.$onInit = function () {
+        // component initialisation
+      };
+      this.$onChanges = function (changes) {
+        if (changes.user) {
+          this.user = angular.copy(this.user);
+        }
+      };
+      this.$postLink = function () {
+        // component post-link
+      };
+      this.$onDestroy = function () {
+        // component $destroy function
+      };
+    },
+    template: `
+      <div>
+        <input type="text" ng-model="$ctrl.user.name">
+        <a href="" ng-click="$ctrl.onUpdate({$event: {user: $ctrl.user}});">Update</a>
+      </div>
+    `
+  });
 </script>
 ```
 
