@@ -48,10 +48,13 @@
           for (var prop in bindings) {
             var binding = bindings[prop];
             if (binding.charAt(0) === '<') {
-              var value = (
+              var attr = (
                 binding.substring(1) === '' ? prop : binding.substring(1)
               );
-              oneWayQueue.unshift(value);
+              oneWayQueue.unshift({
+              	local: prop,
+                attr: attr
+              });
             } else {
               newBindings[prop] = binding;
             }
@@ -122,15 +125,16 @@
                 var destroyQueue = [];
                 for (var q = oneWayQueue.length; q--;) {
                   var prop = oneWayQueue[q];
-                  var unbindParent = $scope.$parent.$watch($attrs[prop], function (newValue, oldValue) {
-                    self[prop] = newValue;
-                    updateChangeListener(prop, newValue, oldValue, true);
+                  var newAttr = prop.attr === '' ? prop : prop.attr;
+                  var unbindParent = $scope.$parent.$watch($attrs[newAttr], function (newValue, oldValue) {
+                    self[prop.local] = newValue;
+                    updateChangeListener(prop.local, newValue, oldValue, true);
                   });
                   destroyQueue.unshift(unbindParent);
                   var unbindLocal = $scope.$watch(function () {
-                    return self[prop];
+                    return self[prop.local];
                   }, function (newValue, oldValue) {
-                    updateChangeListener(prop, newValue, oldValue, false);
+                    updateChangeListener(prop.local, newValue, oldValue, false);
                   });
                   destroyQueue.unshift(unbindLocal);
                 }
