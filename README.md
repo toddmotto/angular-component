@@ -14,20 +14,19 @@ _Note_: you must include this script straight after `angular.js` and before your
 
 This polyfill supports the following feature set of the `.component()` method:
 
-| Feature                                               | Support  |
-|-------------------------------------------------------|----------|
-| `angular.module.component()` method                   | Yes      |
-| `bindings` property                                   | Yes      |
-| `'E'` restrict default                                | Yes      |
-| `$ctrl` controllerAs default                          | Yes      |
-| `transclude` property                                 | Yes      |
-| `template` support                                    | Yes      |
-| `templateUrl` injectable for `$element` and `$attrs`  | Yes      |
-| Lifecycle hooks: `$onInit`, `$postLink`, `$onDestroy` | Yes      |
-| `require` Object for parent Component inheritance     | Yes      |
-| `$` prefixed properties such as `$canActivate`        | Yes      |
-| One-way data-binding emulated                         | Yes      |
-| `$onChanges` lifecycle hook                           | Yes      |
+| Feature                                                        | Supports  |
+|----------------------------------------------------------------|-----------|
+| `angular.module.component()` method                            | Yes       |
+| `bindings` property                                            | Yes       |
+| `'E'` restrict default                                         | Yes       |
+| `$ctrl` controllerAs default                                   | Yes       |
+| `transclude` property                                          | Yes       |
+| `template` support                                             | Yes       |
+| `templateUrl` injectable for `$element` and `$attrs`           | Yes       |
+| One-way data-binding emulated                                  | Yes       |
+| Lifecycles: `$onInit`, `$onChanges`m `$postLink`, `$onDestroy` | Yes       |
+| `require` Object for parent Component inheritance              | Yes       |
+| `$` prefixed properties such as `$canActivate`                 | Yes       |
 
 ### Component method usage
 
@@ -117,7 +116,8 @@ Ensure you're using the files from the `dist` directory (contains compiled produ
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using Gulp.
 
 ## Release history
-
+- 0.1.0
+  - Stable version, small bugfix on dynamic property binding name
 - 0.0.8
   - Add new lifecycle hooks ($onInit, $onDestroy, $postLink)
 - 0.0.7
