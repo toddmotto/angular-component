@@ -117,7 +117,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release history
 - 0.1.0
-  - Stable version, small bugfix on dynamic property binding name
+  - Add one-way data-binding and $onChanges lifecycle, stable release
 - 0.0.8
   - Add new lifecycle hooks ($onInit, $onDestroy, $postLink)
 - 0.0.7
