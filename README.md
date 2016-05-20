@@ -2,7 +2,7 @@
 
 Start using `.component()` now!
 
-> [View live demo in v1.3.0](https://jsfiddle.net/99zeLukc)
+> [View live demo in v1.3.0](https://jsfiddle.net/vz53audf)
 
 angular-component.js is a `~1kb` script that adds `component()` support in Angular 1.5 to all Angular versions above `1.3`, so you can begin using the new method now.
 
