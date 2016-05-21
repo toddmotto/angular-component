@@ -7,13 +7,15 @@
   "license": "MIT",
   "homepage": "https://github.com/toddmotto/angular-component",
   "devDependencies": {
+    "babel-preset-es2015": "^6.9.0",
     "gulp": "~3.9.0",
-    "gulp-uglify": "~0.3.0",
-    "gulp-rename": "~1.1.0",
+    "gulp-babel": "^6.1.2",
     "gulp-clean": "^0.2.4",
-    "gulp-plumber": "~0.6.2",
     "gulp-header": "^1.0.2",
     "gulp-jshint": "^1.6.1",
+    "gulp-plumber": "~0.6.2",
+    "gulp-rename": "~1.1.0",
+    "gulp-uglify": "~0.3.0",
     "jshint-stylish": "^0.2.0"
   }
 }

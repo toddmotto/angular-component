@@ -1,38 +1,79 @@
 /*! angular-component v0.1.2 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
-(function () {
+'use strict';
+
+(function (angular) {
 
   var ng = angular.module;
+  var toString = Object.prototype.toString;
 
-  function identifierForController(controller, ident) {
+  var identifierForController = function identifierForController(controller, ident) {
     if (ident && typeof ident === 'string') return ident;
     if (typeof controller === 'string') {
       var match = /^(\S+)(\s+as\s+(\w+))?$/.exec(controller);
       if (match) return match[3];
     }
-  }
+  };
 
   function module() {
 
-    var hijacked = ng.apply(this, arguments);
+    var hijacked = ng.apply(undefined, arguments);
 
     if (hijacked.component) {
       return hijacked;
     }
 
-    function component(name, options) {
+    var component = function component(name, options) {
 
-      function factory($injector) {
+      var controller = options.controller || function () {};
+
+      var factory = function factory($injector, $parse) {
+
+        var oneWayQueue = [];
+
+        var _parseRequire = parseRequire(options.require);
+
+        var require = _parseRequire.require;
+        var controllerNames = _parseRequire.controllerNames;
+
+        var bindings = parseBindings(options.bindings);
+
+        function parseRequire(required) {
+          var parsed = {
+            require: [name],
+            controllerNames: []
+          };
+          if (toString.call(required) === '[object Object]') {
+            for (var prop in required) {
+              parsed.require.push(required[prop]);
+              parsed.controllerNames.push(prop);
+            }
+          }
+          return parsed;
+        }
+
+        function parseBindings(bindings) {
+          var parsed = {};
+          for (var prop in bindings) {
+            var binding = bindings[prop];
+            if (binding.charAt(0) === '<') {
+              var attr = binding.substring(1);
+              oneWayQueue.unshift({
+                local: prop,
+                attr: attr === '' ? prop : attr
+              });
+            } else {
+              parsed[prop] = binding;
+            }
+          }
+          return parsed;
+        }
 
         function makeInjectable(fn) {
-          var closure;
-          var isArray = angular.isArray(fn);
-          if (angular.isFunction(fn) || isArray) {
+          var isArray = toString.call(fn) === '[object Array]';
+          var isFunction = typeof fn === 'function';
+          if (isFunction || isArray) {
             return function (tElement, tAttrs) {
-              return $injector.invoke((isArray ? fn : [
-                '$element',
-                '$attrs',
-                fn
-              ]), this, {
+              return $injector.invoke(isArray ? fn : ['$element', '$attrs', fn], this, {
                 $element: tElement,
                 $attrs: tAttrs
               });
@@ -42,116 +83,99 @@
           }
         }
 
-        var oneWayQueue = [];
-
-        function parseBindings(bindings) {
-          var newBindings = {};
-          for (var prop in bindings) {
-            var binding = bindings[prop];
-            if (binding.charAt(0) === '<') {
-              var attr = binding.substring(1);
-              oneWayQueue.unshift({
-              	local: prop,
-                attr: attr === '' ? prop : attr
-              });
-            } else {
-              newBindings[prop] = binding;
-            }
+        function postLink($scope, $element, $attrs, $ctrls) {
+          var self = $ctrls[0];
+          if (typeof self.$postLink === 'function') {
+            self.$postLink();
           }
-          return newBindings;
         }
 
-        var modifiedBindings = parseBindings(options.bindings);
+        function preLink($scope, $element, $attrs, $ctrls) {
 
-        var requires = [name];
-        var ctrlNames = [];
-        if (angular.isObject(options.require)) {
-          for (var prop in options.require) {
-            requires.push(options.require[prop]);
-            ctrlNames.push(prop);
+          var changes = void 0;
+          var self = $ctrls[0];
+          var controllers = controllerNames;
+
+          for (var i = 0; i < controllers.length; i++) {
+            self[controllers[i]] = $ctrls[i + 1];
+          }
+
+          function updateChangeListener(key, newValue, oldValue, flush) {
+            if (typeof self.$onChanges !== 'function') {
+              return;
+            }
+            if (!changes) {
+              changes = {};
+            }
+            changes[key] = {
+              currentValue: newValue,
+              previousValue: changes[key] ? changes[key].currentValue : oldValue
+            };
+            if (flush) {
+              self.$onChanges(changes);
+              changes = undefined;
+            }
+          }
+
+          if (oneWayQueue.length) {
+            (function () {
+              var destroyQueue = [];
+
+              var _loop = function _loop(q) {
+                var current = oneWayQueue[q];
+                var initialValue = $parse($attrs[current.attr])($scope.$parent);
+                self[current.local] = initialValue;
+                var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
+                  self[current.local] = newValue;
+                  updateChangeListener(current.local, newValue, oldValue, true);
+                });
+                destroyQueue.unshift(unbindParent);
+                var unbindLocal = $scope.$watch(function () {
+                  return self[current.local];
+                }, function (newValue, oldValue) {
+                  updateChangeListener(current.local, newValue, oldValue, false);
+                });
+                destroyQueue.unshift(unbindLocal);
+              };
+
+              for (var q = oneWayQueue.length; q--;) {
+                _loop(q);
+              }
+              $scope.$on('$destroy', function () {
+                for (var _i = destroyQueue.length; _i--;) {
+                  destroyQueue[_i]();
+                }
+              });
+            })();
+          }
+
+          if (typeof self.$onInit === 'function') {
+            self.$onInit();
+          }
+
+          if (typeof self.$onDestroy === 'function') {
+            $scope.$on('$destroy', function () {
+              self.$onDestroy.call(self);
+            });
           }
         }
 
         return {
-          controller: options.controller || angular.noop,
-          controllerAs: identifierForController(options.controller) || options.controllerAs || '$ctrl',
-          template: makeInjectable(
-            !options.template && !options.templateUrl ? '' : options.template
-          ),
+          controller: controller,
+          controllerAs: identifierForController(controller) || options.controllerAs || '$ctrl',
+          template: makeInjectable(!options.template && !options.templateUrl ? '' : options.template),
           templateUrl: makeInjectable(options.templateUrl),
           transclude: options.transclude,
-          scope: modifiedBindings || {},
-          bindToController: !!modifiedBindings,
+          scope: bindings || {},
+          bindToController: !!bindings,
           restrict: 'E',
-          require: requires,
+          require: require,
           link: {
-            pre: function ($scope, $element, $attrs, $ctrls) {
-              var self = $ctrls[0];
-              for (var i = 0; i < ctrlNames.length; i++) {
-                self[ctrlNames[i]] = $ctrls[i + 1];
-              }
-              if (typeof self.$onInit === 'function') {
-                self.$onInit();
-              }
-              if (typeof self.$onDestroy === 'function') {
-                $scope.$on('$destroy', function () {
-                  self.$onDestroy.call(self);
-                });
-              }
-              var changes;
-              function triggerOnChanges() {
-                self.$onChanges(changes);
-                changes = undefined;
-              }
-              function updateChangeListener(key, newValue, oldValue, flush) {
-                if (typeof self.$onChanges === 'function') {
-                  if (!changes) {
-                    changes = {};
-                  }
-                  if (changes[key]) {
-                    oldValue = changes[key].currentValue;
-                  }
-                  changes[key] = {
-                    currentValue: newValue,
-                    previousValue: oldValue
-                  };
-                  if (flush) {
-                    triggerOnChanges();
-                  }
-                }
-              }
-              if (oneWayQueue.length) {
-                var destroyQueue = [];
-                for (var q = oneWayQueue.length; q--;) {
-                  var current = oneWayQueue[q];
-                  var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
-                    self[current.local] = newValue;
-                    updateChangeListener(current.local, newValue, oldValue, true);
-                  });
-                  destroyQueue.unshift(unbindParent);
-                  var unbindLocal = $scope.$watch(function () {
-                    return self[current.local];
-                  }, function (newValue, oldValue) {
-                    updateChangeListener(current.local, newValue, oldValue, false);
-                  });
-                  destroyQueue.unshift(unbindLocal);
-                }
-                $scope.$on('$destroy', function () {
-                  for (var i = destroyQueue.length; i--;) {
-                    destroyQueue[i]();
-                  }
-                });
-              }
-            },
-            post: function ($scope, $element, $attrs, $ctrls) {
-              var self = $ctrls[0];
-              if (typeof self.$postLink === 'function') {
-                self.$postLink();
-              }
-            }
+            pre: preLink,
+            post: postLink
           }
         };
-      }
+      };
 
       for (var key in options) {
         if (key.charAt(0) === '$') {
@@ -159,18 +183,15 @@
         }
       }
 
-      factory.$inject = ['$injector'];
+      factory.$inject = ['$injector', '$parse'];
 
       return hijacked.directive(name, factory);
-
-    }
+    };
 
     hijacked.component = component;
 
     return hijacked;
-
   }
 
   angular.module = module;
-
-})();
+})(window.angular);
