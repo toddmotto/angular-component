@@ -5,7 +5,7 @@ module.exports = function (config) {
     files: [
       'node_modules/angular/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
-      'src/angular-component.js',
+      'dist/angular-component.js',
       'tests/**/*.spec.js'
     ],
     exclude: [],
@@ -17,7 +17,7 @@ module.exports = function (config) {
       require('karma-junit-reporter')
     ],
     preprocessors: {
-      'src/js/**/*.js': ['babel']
+      'tests/**/*.spec.js': ['babel']
     },
     babelPreprocessor: {
       options: {
