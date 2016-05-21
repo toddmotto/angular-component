@@ -92,7 +92,7 @@
 
         function preLink($scope, $element, $attrs, $ctrls) {
 
-          var changes = void 0;
+          var changes = {};
           var self = $ctrls[0];
           var controllers = controllerNames;
 
@@ -129,6 +129,9 @@
                   self[current.local] = newValue;
                   updateChangeListener(current.local, newValue, oldValue, true);
                 });
+                changes[current.local] = {
+                  currentValue: initialValue
+                };
                 destroyQueue.unshift(unbindParent);
                 var unbindLocal = $scope.$watch(function () {
                   return self[current.local];
@@ -141,6 +144,7 @@
               for (var q = oneWayQueue.length; q--;) {
                 _loop(q);
               }
+              self.$onChanges(changes);
               $scope.$on('$destroy', function () {
                 for (var _i = destroyQueue.length; _i--;) {
                   destroyQueue[_i]();
