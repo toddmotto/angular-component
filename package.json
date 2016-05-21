@@ -6,6 +6,9 @@
   "author": "@toddmotto",
   "license": "MIT",
   "homepage": "https://github.com/toddmotto/angular-component",
+  "scripts": {
+    "test": "gulp && karma start"
+  },
   "devDependencies": {
     "angular": "1.3.0",
     "angular-mocks": "1.3.0",
