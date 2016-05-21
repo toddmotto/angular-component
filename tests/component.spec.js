@@ -1,8 +1,9 @@
 describe('Component Method', () => {
 
+  let createModule = () => angular.module('polyfill', []);
+
   it('should create the module.component method', () => {
-    angular
-      .module('polyfill', []);
+    createModule();
 
     module('polyfill');
 
@@ -10,8 +11,7 @@ describe('Component Method', () => {
   });
 
   it('should return ddo with reasonable defaults', () => {
-    angular
-      .module('polyfill', [])
+    createModule()
       .component('polyfillComponent', {});
 
     module('polyfill');
@@ -44,8 +44,7 @@ describe('Component Method', () => {
       }
     };
 
-    angular
-      .module('polyfill', [])
+    createModule()
       .component('polyfillComponent', polyfillComponent);
 
     module('polyfill');
@@ -78,8 +77,7 @@ describe('Component Method', () => {
       }
     };
 
-    angular
-      .module('polyfill', [])
+    createModule()
       .component('polyfillComponent', polyfillComponent);
 
     module('polyfill');
@@ -103,8 +101,7 @@ describe('Component Method', () => {
       }]
     };
 
-    angular
-      .module('polyfill', [])
+    createModule()
       .component('polyfillComponent', polyfillComponent);
 
     module('polyfill');
@@ -121,8 +118,7 @@ describe('Component Method', () => {
       transclude: {}
     };
 
-    angular
-      .module('polyfill', [])
+    createModule()
       .component('polyfillComponent', polyfillComponent);
 
     module('polyfill');
@@ -139,8 +135,7 @@ describe('Component Method', () => {
       controller: 'MyCtrl as vm'
     };
 
-    angular
-      .module('polyfill', [])
+    createModule()
       .component('polyfillComponent', polyfillComponent);
 
     module('polyfill');
