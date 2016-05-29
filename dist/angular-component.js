@@ -151,18 +151,11 @@
           }
 
           function setupWatchers(watchers) {
-            var destroyQueue = [];
             for (var i = watchers.length; i--;) {
               var current = watchers[i];
               current.ctx.$watch(current.exp, current.fn);
               destroyQueue.unshift(current);
             }
-            $scope.$on('$destroy', function () {
-              for (var _i = destroyQueue.length; _i--;) {
-                destroyQueue[_i]();
-              }
-              destroyQueue = undefined;
-            });
           }
 
           /**
@@ -180,6 +173,8 @@
           // }
 
           if (oneWayQueue.length) {
+
+            destroyQueue = [];
 
             for (var q = oneWayQueue.length; q--;) {
               (function (local, attr) {
@@ -207,6 +202,13 @@
                 }]);
               })(oneWayQueue[q].local, oneWayQueue[q].attr);
             }self.$onChanges(changes);
+
+            $scope.$on('$destroy', function () {
+              for (var _i = destroyQueue.length; _i--;) {
+                destroyQueue[_i]();
+              }
+              destroyQueue = undefined;
+            });
           }
 
           if (typeof self.$onInit === 'function') {

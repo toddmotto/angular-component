@@ -145,18 +145,11 @@
           }
 
           function setupWatchers(watchers) {
-            var destroyQueue = [];
             for (var i = watchers.length; i--;) {
               let current = watchers[i];
               current.ctx.$watch(current.exp, current.fn);
               destroyQueue.unshift(current);
             }
-            $scope.$on('$destroy', () => {
-              for (let i = destroyQueue.length; i--;) {
-                destroyQueue[i]();
-              }
-              destroyQueue = undefined;
-            });
           }
 
           /**
@@ -174,6 +167,8 @@
           // }
 
           if (oneWayQueue.length) {
+
+            destroyQueue = [];
 
             for (let q = oneWayQueue.length; q--;) ((local, attr) => {
 
@@ -201,6 +196,13 @@
             })(oneWayQueue[q].local, oneWayQueue[q].attr);
 
             self.$onChanges(changes);
+
+            $scope.$on('$destroy', () => {
+              for (let i = destroyQueue.length; i--;) {
+                destroyQueue[i]();
+              }
+              destroyQueue = undefined;
+            });
 
           }
 
