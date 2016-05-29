@@ -19,18 +19,16 @@
       return hijacked;
     }
 
-    class UNINITIALIZED_VALUE {}
+    function UNINITIALIZED_VALUE() {}
     let _UNINITIALIZED_VALUE = new UNINITIALIZED_VALUE();
 
-    class SimpleChange {
-      constructor(previous, current) {
-        this.previousValue = previous;
-        this.currentValue = current;
-      }
-      isFirstChange() {
-        return this.previousValue === _UNINITIALIZED_VALUE;
-      }
+    function SimpleChange(previous, current) {
+      this.previousValue = previous;
+      this.currentValue = current;
     }
+    SimpleChange.prototype.isFirstChange = function () {
+      return this.previousValue === _UNINITIALIZED_VALUE;
+    };
 
     let component = (name, options) => {
 
@@ -39,6 +37,7 @@
       let factory = ($injector, $parse) => {
 
         let oneWayQueue = [];
+        let attrBindQueue = [];
         let {require, controllerNames} = parseRequire(options.require);
         let bindings = parseBindings(options.bindings);
 
@@ -60,14 +59,30 @@
           let parsed = {};
           for (let prop in bindings) {
             let binding = bindings[prop];
-            if (binding.charAt(0) === '<') {
-              let attr = binding.substring(1);
-              oneWayQueue.unshift({
-              	local: prop,
-                attr: attr === '' ? prop : attr
-              });
-            } else {
-              parsed[prop] = binding;
+            switch (binding.charAt(0)) {
+              case '<':
+                let oneWayAttr = binding.substring(1);
+                oneWayQueue.unshift({
+                  local: prop,
+                  attr: oneWayAttr === '' ? prop : oneWayAttr
+                });
+                break;
+              case '@':
+                /**
+                 * @TODO: Finalise '@' $observers
+                 * Need to look into this implementation, we could just
+                 * use the native '@' bindings, however we don't get $observe()
+                 * access to update the change hash, so might need manual binding
+                 */
+                // let attr = binding.substring(1);
+                // attrBindQueue.unshift({
+                //   local: prop,
+                //   attr: attr === '' ? prop : attr
+                // });
+                parsed[prop] = binding;
+                break;
+              default:
+                parsed[prop] = binding;
             }
           }
           return parsed;
@@ -77,7 +92,7 @@
           let isArray = toString.call(fn) === '[object Array]';
           let isFunction = typeof fn === 'function';
           if (isFunction || isArray) {
-            return function (tElement, tAttrs) {
+            return (tElement, tAttrs) => {
               return $injector.invoke((isArray ? fn : [
                 '$element',
                 '$attrs',
@@ -92,26 +107,30 @@
           }
         }
 
-        function postLink($scope, $element, $attrs, $ctrls) {
-          let self = $ctrls[0];
-          if (typeof self.$postLink === 'function') {
-            self.$postLink();
-          }
-        }
-
-        function preLink($scope, $element, $attrs, $ctrls) {
+        function pre($scope, $element, $attrs, $ctrls) {
 
           let changes = {};
+          let destroyQueue;
           let self = $ctrls[0];
           let controllers = controllerNames;
 
-          for (let i = 0; i < controllers.length; i++) {
+          for (let i = 0, ii = controllers.length; i < ii; i++) {
             self[controllers[i]] = $ctrls[i + 1];
           }
 
+          var onChangesQueue;
+
+          function triggerOnChangesHook() {
+            self.$onChanges(changes);
+            changes = undefined;
+          }
+
           function updateChangeListener(key, newValue, oldValue, flush) {
-            if (typeof self.$onChanges !== 'function') {
+            if (typeof self.$onChanges !== 'function' && newValue !== oldValue) {
               return;
+            }
+            if (!onChangesQueue) {
+              onChangesQueue = [];
             }
             if (!changes) {
               changes = {};
@@ -121,69 +140,101 @@
             }
             changes[key] = new SimpleChange(oldValue, newValue);
             if (flush) {
-              self.$onChanges(changes);
-              changes = undefined;
+              triggerOnChangesHook();
             }
           }
 
-          if (oneWayQueue.length) {
-            let destroyQueue = [];
-            for (let q = oneWayQueue.length; q--;) {
-
-              let current = oneWayQueue[q];
-              let initialValue = self[current.local] = $parse($attrs[current.attr])($scope.$parent);
-              self[current.local] = initialValue;
-
-              let unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
-                self[current.local] = newValue;
-                updateChangeListener(current.local, newValue, oldValue, true);
-              });
-              changes[current.local] = new SimpleChange(_UNINITIALIZED_VALUE, initialValue);
-              destroyQueue.unshift(unbindParent);
-              let unbindLocal = $scope.$watch(function () {
-                return self[current.local];
-              }, function (newValue, oldValue) {
-                updateChangeListener(current.local, newValue, oldValue, false);
-              });
-              destroyQueue.unshift(unbindLocal);
+          function setupWatchers(watchers) {
+            var destroyQueue = [];
+            for (var i = watchers.length; i--;) {
+              let current = watchers[i];
+              current.ctx.$watch(current.exp, current.fn);
+              destroyQueue.unshift(current);
             }
-            self.$onChanges(changes);
             $scope.$on('$destroy', () => {
               for (let i = destroyQueue.length; i--;) {
                 destroyQueue[i]();
               }
+              destroyQueue = undefined;
             });
+          }
+
+          /**
+           * @TODO: This initial stuff works, but breaks the tests, needs more understanding
+           */
+          // if (attrBindQueue.length) {
+          //   attrBindQueue.forEach(current => {
+          //     self[current.local] = new SimpleChange(_UNINITIALIZED_VALUE, $attrs[current.attr]);
+          //     $attrs.$observe(current.attr, newValue => {
+          //       let oldValue = self[current.local];
+          //       self[current.local] = newValue;
+          //       updateChangeListener(current.local, newValue, oldValue, false);
+          //     });
+          //   });
+          // }
+
+          if (oneWayQueue.length) {
+
+            for (let q = oneWayQueue.length; q--;) ((local, attr) => {
+
+              let parentScope = $scope.$parent;
+              let initialValue = self[local] = $parse($attrs[attr])(parentScope);
+              self[local] = initialValue;
+              changes[local] = new SimpleChange(_UNINITIALIZED_VALUE, initialValue);
+
+              setupWatchers([
+                {
+                  ctx: parentScope,
+                  exp: $attrs[attr],
+                  fn(newValue, oldValue) {
+                    self[local] = newValue;
+                    updateChangeListener(local, newValue, oldValue, true);
+                  }
+                },
+                {
+                  ctx: $scope,
+                  exp: () => self[local],
+                  fn: (newValue, oldValue) => updateChangeListener(local, newValue, oldValue, false)
+                }
+              ]);
+
+            })(oneWayQueue[q].local, oneWayQueue[q].attr);
+
+            self.$onChanges(changes);
+
           }
 
           if (typeof self.$onInit === 'function') {
             self.$onInit();
           }
-
           if (typeof self.$onDestroy === 'function') {
-            $scope.$on('$destroy', () => {
-              self.$onDestroy.call(self);
-            });
+            $scope.$on('$destroy', () => self.$onDestroy.call(self));
           }
 
         }
 
-        return {
-          controller: controller,
+        function post($scope, $element, $attrs, $ctrls) {
+          let self = $ctrls[0];
+          if (typeof self.$postLink === 'function') {
+            self.$postLink();
+          }
+        }
+
+        var ddo = {
+          controller,
           controllerAs: identifierForController(controller) || options.controllerAs || '$ctrl',
-          template: makeInjectable(
-            !options.template && !options.templateUrl ? '' : options.template
-          ),
+          template: makeInjectable(!options.template && !options.templateUrl ? '' : options.template),
           templateUrl: makeInjectable(options.templateUrl),
           transclude: options.transclude,
-          scope: bindings || {},
+          scope: bindings,
           bindToController: !!bindings,
           restrict: 'E',
-          require: require,
-          link: {
-            pre: preLink,
-            post: postLink
-          }
+          require,
+          link: { pre, post }
         };
+
+        return ddo;
+
       };
 
       for (let key in options) {

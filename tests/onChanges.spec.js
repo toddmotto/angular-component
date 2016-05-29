@@ -32,7 +32,9 @@ describe('$onChanges lifecycle hook', () => {
         $rootScope.val2 = val * 2;
       });
 
-      const element = $compile('<polyfill-component prop1="val" prop2="val2" other="val3" attr="{{val4}}"></polyfill-component>')($rootScope);
+      const element = $compile(
+        '<polyfill-component prop1="val" prop2="val2" other="val3" attr="{{val4}}"></polyfill-component>'
+      )($rootScope);
 
       expect(log[0].prop1.currentValue).toEqual(undefined);
       expect(log[0].prop2.currentValue).toEqual(undefined);
@@ -59,12 +61,16 @@ describe('$onChanges lifecycle hook', () => {
       $rootScope.$apply('val3 = 63');
       expect(log).toEqual([]);
 
-      //$rootScope.$apply('val4 = 22');
-      //expect(log).toEqual([
+      /**
+       * @TODO: Implement '@' changes to pass these tests
+       */
+      // $rootScope.$apply('val4 = 22');
+      // expect(log).toEqual([
       //  {
       //    attr: jasmine.objectContaining({previousValue: '', currentValue: '22'})
       //  }
-      //]);
+      // ]);
+
     });
   });
 

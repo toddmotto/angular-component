@@ -1,10 +1,6 @@
 /*! angular-component v0.1.2 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 (function (angular) {
 
   var ng = angular.module;
@@ -26,29 +22,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return hijacked;
     }
 
-    var UNINITIALIZED_VALUE = function UNINITIALIZED_VALUE() {
-      _classCallCheck(this, UNINITIALIZED_VALUE);
-    };
-
+    function UNINITIALIZED_VALUE() {}
     var _UNINITIALIZED_VALUE = new UNINITIALIZED_VALUE();
 
-    var SimpleChange = function () {
-      function SimpleChange(previous, current) {
-        _classCallCheck(this, SimpleChange);
-
-        this.previousValue = previous;
-        this.currentValue = current;
-      }
-
-      _createClass(SimpleChange, [{
-        key: 'isFirstChange',
-        value: function isFirstChange() {
-          return this.previousValue === _UNINITIALIZED_VALUE;
-        }
-      }]);
-
-      return SimpleChange;
-    }();
+    function SimpleChange(previous, current) {
+      this.previousValue = previous;
+      this.currentValue = current;
+    }
+    SimpleChange.prototype.isFirstChange = function () {
+      return this.previousValue === _UNINITIALIZED_VALUE;
+    };
 
     var component = function component(name, options) {
 
@@ -57,6 +40,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var factory = function factory($injector, $parse) {
 
         var oneWayQueue = [];
+        var attrBindQueue = [];
 
         var _parseRequire = parseRequire(options.require);
 
@@ -83,25 +67,43 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           var parsed = {};
           for (var prop in bindings) {
             var binding = bindings[prop];
-            if (binding.charAt(0) === '<') {
-              var attr = binding.substring(1);
-              oneWayQueue.unshift({
-                local: prop,
-                attr: attr === '' ? prop : attr
-              });
-            } else {
-              parsed[prop] = binding;
+            switch (binding.charAt(0)) {
+              case '<':
+                var oneWayAttr = binding.substring(1);
+                oneWayQueue.unshift({
+                  local: prop,
+                  attr: oneWayAttr === '' ? prop : oneWayAttr
+                });
+                break;
+              case '@':
+                /**
+                 * @TODO: Finalise '@' $observers
+                 * Need to look into this implementation, we could just
+                 * use the native '@' bindings, however we don't get $observe()
+                 * access to update the change hash, so might need manual binding
+                 */
+                // let attr = binding.substring(1);
+                // attrBindQueue.unshift({
+                //   local: prop,
+                //   attr: attr === '' ? prop : attr
+                // });
+                parsed[prop] = binding;
+                break;
+              default:
+                parsed[prop] = binding;
             }
           }
           return parsed;
         }
 
         function makeInjectable(fn) {
+          var _this = this;
+
           var isArray = toString.call(fn) === '[object Array]';
           var isFunction = typeof fn === 'function';
           if (isFunction || isArray) {
             return function (tElement, tAttrs) {
-              return $injector.invoke(isArray ? fn : ['$element', '$attrs', fn], this, {
+              return $injector.invoke(isArray ? fn : ['$element', '$attrs', fn], _this, {
                 $element: tElement,
                 $attrs: tAttrs
               });
@@ -111,26 +113,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           }
         }
 
-        function postLink($scope, $element, $attrs, $ctrls) {
-          var self = $ctrls[0];
-          if (typeof self.$postLink === 'function') {
-            self.$postLink();
-          }
-        }
-
-        function preLink($scope, $element, $attrs, $ctrls) {
+        function pre($scope, $element, $attrs, $ctrls) {
 
           var changes = {};
+          var destroyQueue = void 0;
           var self = $ctrls[0];
           var controllers = controllerNames;
 
-          for (var i = 0; i < controllers.length; i++) {
+          for (var i = 0, ii = controllers.length; i < ii; i++) {
             self[controllers[i]] = $ctrls[i + 1];
           }
 
+          var onChangesQueue;
+
+          function triggerOnChangesHook() {
+            self.$onChanges(changes);
+            changes = undefined;
+          }
+
           function updateChangeListener(key, newValue, oldValue, flush) {
-            if (typeof self.$onChanges !== 'function') {
+            if (typeof self.$onChanges !== 'function' && newValue !== oldValue) {
               return;
+            }
+            if (!onChangesQueue) {
+              onChangesQueue = [];
             }
             if (!changes) {
               changes = {};
@@ -140,73 +146,100 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
             changes[key] = new SimpleChange(oldValue, newValue);
             if (flush) {
-              self.$onChanges(changes);
-              changes = undefined;
+              triggerOnChangesHook();
             }
           }
 
-          if (oneWayQueue.length) {
-            (function () {
-              var destroyQueue = [];
-
-              var _loop = function _loop(q) {
-
-                var current = oneWayQueue[q];
-                var initialValue = self[current.local] = $parse($attrs[current.attr])($scope.$parent);
-                self[current.local] = initialValue;
-
-                var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
-                  self[current.local] = newValue;
-                  updateChangeListener(current.local, newValue, oldValue, true);
-                });
-                changes[current.local] = new SimpleChange(_UNINITIALIZED_VALUE, initialValue);
-                destroyQueue.unshift(unbindParent);
-                var unbindLocal = $scope.$watch(function () {
-                  return self[current.local];
-                }, function (newValue, oldValue) {
-                  updateChangeListener(current.local, newValue, oldValue, false);
-                });
-                destroyQueue.unshift(unbindLocal);
-              };
-
-              for (var q = oneWayQueue.length; q--;) {
-                _loop(q);
+          function setupWatchers(watchers) {
+            var destroyQueue = [];
+            for (var i = watchers.length; i--;) {
+              var current = watchers[i];
+              current.ctx.$watch(current.exp, current.fn);
+              destroyQueue.unshift(current);
+            }
+            $scope.$on('$destroy', function () {
+              for (var _i = destroyQueue.length; _i--;) {
+                destroyQueue[_i]();
               }
-              self.$onChanges(changes);
-              $scope.$on('$destroy', function () {
-                for (var _i = destroyQueue.length; _i--;) {
-                  destroyQueue[_i]();
-                }
-              });
-            })();
+              destroyQueue = undefined;
+            });
+          }
+
+          /**
+           * @TODO: This initial stuff works, but breaks the tests, needs more understanding
+           */
+          // if (attrBindQueue.length) {
+          //   attrBindQueue.forEach(current => {
+          //     self[current.local] = new SimpleChange(_UNINITIALIZED_VALUE, $attrs[current.attr]);
+          //     $attrs.$observe(current.attr, newValue => {
+          //       let oldValue = self[current.local];
+          //       self[current.local] = newValue;
+          //       updateChangeListener(current.local, newValue, oldValue, false);
+          //     });
+          //   });
+          // }
+
+          if (oneWayQueue.length) {
+
+            for (var q = oneWayQueue.length; q--;) {
+              (function (local, attr) {
+
+                var parentScope = $scope.$parent;
+                var initialValue = self[local] = $parse($attrs[attr])(parentScope);
+                self[local] = initialValue;
+                changes[local] = new SimpleChange(_UNINITIALIZED_VALUE, initialValue);
+
+                setupWatchers([{
+                  ctx: parentScope,
+                  exp: $attrs[attr],
+                  fn: function fn(newValue, oldValue) {
+                    self[local] = newValue;
+                    updateChangeListener(local, newValue, oldValue, true);
+                  }
+                }, {
+                  ctx: $scope,
+                  exp: function exp() {
+                    return self[local];
+                  },
+                  fn: function fn(newValue, oldValue) {
+                    return updateChangeListener(local, newValue, oldValue, false);
+                  }
+                }]);
+              })(oneWayQueue[q].local, oneWayQueue[q].attr);
+            }self.$onChanges(changes);
           }
 
           if (typeof self.$onInit === 'function') {
             self.$onInit();
           }
-
           if (typeof self.$onDestroy === 'function') {
             $scope.$on('$destroy', function () {
-              self.$onDestroy.call(self);
+              return self.$onDestroy.call(self);
             });
           }
         }
 
-        return {
+        function post($scope, $element, $attrs, $ctrls) {
+          var self = $ctrls[0];
+          if (typeof self.$postLink === 'function') {
+            self.$postLink();
+          }
+        }
+
+        var ddo = {
           controller: controller,
           controllerAs: identifierForController(controller) || options.controllerAs || '$ctrl',
           template: makeInjectable(!options.template && !options.templateUrl ? '' : options.template),
           templateUrl: makeInjectable(options.templateUrl),
           transclude: options.transclude,
-          scope: bindings || {},
+          scope: bindings,
           bindToController: !!bindings,
           restrict: 'E',
           require: require,
-          link: {
-            pre: preLink,
-            post: postLink
-          }
+          link: { pre: pre, post: post }
         };
+
+        return ddo;
       };
 
       for (var key in options) {
