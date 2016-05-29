@@ -68,44 +68,43 @@ describe('$onChanges lifecycle hook', () => {
     });
   });
 
+  it('should trigger `$onChanges` even if the inner value already equals the new outer value', function() {
+    let log = [];
 
-//   it('should trigger `$onChanges` even if the inner value already equals the new outer value', function() {
-//     let log = [];
-//
-//     class TestController {
-//       constructor() {
-//       }
-//
-//       $onChanges(change) {
-//         log.push(change);
-//       }
-//     }
-//
-//     const polyfillComponent = {
-//       controller: TestController,
-//       bindings: {
-//         'prop1': '<'
-//       }
-//     };
-//
-//     createModule()
-//       .component('polyfillComponent', polyfillComponent);
-//
-//     module('polyfill');
-//
-//     inject(($compile, $rootScope) => {
-//       const element = $compile('<polyfill-component prop1="val"></polyfill-component>')($rootScope);
-//
-//       $rootScope.$apply('val = 1');
-//
-//       expect(log.pop()).toEqual({prop1: jasmine.objectContaining({previousValue: undefined, currentValue: 1})});
-//
-//       element.isolateScope().$ctrl.prop1 = 2;
-//       $rootScope.$apply('val = 2');
-//       expect(log.pop()).toEqual({prop1: jasmine.objectContaining({previousValue: 1, currentValue: 2})});
-//     });
-//   });
-//
+    class TestController {
+      constructor() {
+      }
+
+      $onChanges(change) {
+        log.push(change);
+      }
+    }
+
+    const polyfillComponent = {
+      controller: TestController,
+      bindings: {
+        'prop1': '<'
+      }
+    };
+
+    createModule()
+      .component('polyfillComponent', polyfillComponent);
+
+    module('polyfill');
+
+    inject(($compile, $rootScope) => {
+      const element = $compile('<polyfill-component prop1="val"></polyfill-component>')($rootScope);
+
+      $rootScope.$apply('val = 1');
+
+      expect(log.pop()).toEqual({prop1: jasmine.objectContaining({previousValue: undefined, currentValue: 1})});
+
+      element.isolateScope().$ctrl.prop1 = 2;
+      $rootScope.$apply('val = 2');
+      expect(log.pop()).toEqual({prop1: jasmine.objectContaining({previousValue: 1, currentValue: 2})});
+    });
+  });
+
 //   it('should pass the original value as `previousValue` even if there were multiple changes in a single digest', () => {
 //     let log = [];
 //
@@ -245,7 +244,6 @@ describe('$onChanges lifecycle hook', () => {
       // expect(log[0].attr.isFirstChange()).toEqual(false);
     });
   });
-
 
 //   it('should only trigger one extra digest however many controllers have changes', () => {
 //     let log = [];
