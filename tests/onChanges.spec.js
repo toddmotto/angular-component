@@ -245,128 +245,127 @@ describe('$onChanges lifecycle hook', () => {
     });
   });
 
-//   it('should only trigger one extra digest however many controllers have changes', () => {
-//     let log = [];
-//
-//     class TestController1 {
-//       constructor() {
-//       }
-//
-//       $onChanges(change) {
-//         log.push(['TestController1', change]);
-//       }
-//     }
-//
-//     class TestController2 {
-//       constructor() {
-//       }
-//
-//       $onChanges(change) {
-//         log.push(['TestController2', change]);
-//       }
-//     }
-//
-//     const polyfillOne = {
-//       controller: TestController1,
-//       bindings: {
-//         'prop': '<'
-//       }
-//     };
-//
-//     const polyfillTwo = {
-//       controller: TestController2,
-//       bindings: {
-//         'prop': '<'
-//       }
-//     };
-//
-//     createModule()
-//       .component('polyfillOne', polyfillOne)
-//       .component('polyfillTwo', polyfillTwo);
-//
-//     module('polyfill');
-//
-//     inject(($compile, $rootScope) => {
-//       let watchCount = 0;
-//       $rootScope.$watch(function() { watchCount++; });
-//
-//       const element = $compile('<div><c1 prop="val1"></c1><c2 prop="val2"></c2></div>')($rootScope);
-//
-//       log = [];
-//
-//       $rootScope.$apply('val1 = 42; val2 = 17');
-//
-//       expect(log).toEqual([
-//         ['TestController1', {prop: jasmine.objectContaining({currentValue: 42})}],
-//         ['TestController2', {prop: jasmine.objectContaining({currentValue: 17})}]
-//       ]);
-//
-//       expect(watchCount).toEqual(3);
-//     });
-//   });
-//
-//
-//   it('should cope with changes occuring inside `$onChanges()` hooks', () => {
-//     let log = [];
-//
-//     class OuterController {
-//       constructor() {
-//         this.prop1 = 0;
-//       }
-//
-//       $onChanges(change) {
-//         log.push(['OuterController', change]);
-//
-//         this.b = this.prop1 * 2;
-//       }
-//     }
-//
-//     class InnerController {
-//       constructor() {
-//         this.prop1 = 0;
-//       }
-//
-//       $onChanges(change) {
-//         log.push(['InnerController', change]);
-//       }
-//     }
-//
-//     const outer = {
-//       controller: OuterController,
-//       bindings: {
-//         'prop1': '<'
-//       },
-//       template: '<inner prop2="$ctrl.b"></inner>'
-//     };
-//
-//     const inner = {
-//       controller: InnerController,
-//       bindings: {
-//         'prop2': '<'
-//       }
-//     };
-//
-//     createModule()
-//       .component('outer', outer)
-//       .component('inner', inner);
-//
-//     module('polyfill');
-//
-//     inject(($compile, $rootScope) => {
-//       const element = $compile('<outer prop1="a"></outer>')($rootScope);
-//
-//       log = [];
-//
-//       $rootScope.$apply('a = 42');
-//
-//       expect(log).toEqual([
-//         ['OuterController', {prop1: jasmine.objectContaining({currentValue: 42})}],
-//         ['InnerController', {prop2: jasmine.objectContaining({currentValue: 84})}]
-//       ]);
-//     });
-//   });
-//
-//
+  // it('should only trigger one extra digest however many controllers have changes', () => {
+  //   let log = [];
+  //
+  //   class TestController1 {
+  //     constructor() {
+  //     }
+  //
+  //     $onChanges(change) {
+  //       log.push(['TestController1', change]);
+  //     }
+  //   }
+  //
+  //   class TestController2 {
+  //     constructor() {
+  //     }
+  //
+  //     $onChanges(change) {
+  //       log.push(['TestController2', change]);
+  //     }
+  //   }
+  //
+  //   const polyfillOne = {
+  //     controller: TestController1,
+  //     bindings: {
+  //       'prop': '<'
+  //     }
+  //   };
+  //
+  //   const polyfillTwo = {
+  //     controller: TestController2,
+  //     bindings: {
+  //       'prop': '<'
+  //     }
+  //   };
+  //
+  //   createModule()
+  //     .component('polyfillOne', polyfillOne)
+  //     .component('polyfillTwo', polyfillTwo);
+  //
+  //   module('polyfill');
+  //
+  //   inject(($compile, $rootScope) => {
+  //     let watchCount = 0;
+  //     $rootScope.$watch(function() { watchCount++; });
+  //
+  //     const element = $compile('<div><c1 prop="val1"></c1><c2 prop="val2"></c2></div>')($rootScope);
+  //
+  //     log = [];
+  //
+  //     $rootScope.$apply('val1 = 42; val2 = 17');
+  //
+  //     expect(log).toEqual([
+  //       ['TestController1', {prop: jasmine.objectContaining({currentValue: 42})}],
+  //       ['TestController2', {prop: jasmine.objectContaining({currentValue: 17})}]
+  //     ]);
+  //
+  //     expect(watchCount).toEqual(3);
+  //   });
+  // });
+
+  it('should cope with changes occuring inside `$onChanges()` hooks', () => {
+    let log = [];
+
+    class OuterController {
+      constructor() {
+        this.prop1 = 0;
+      }
+
+      $onChanges(change) {
+        log.push(['OuterController', change]);
+
+        this.b = this.prop1 * 2;
+      }
+    }
+
+    class InnerController {
+      constructor() {
+        this.prop1 = 0;
+      }
+
+      $onChanges(change) {
+        log.push(['InnerController', change]);
+      }
+    }
+
+    const outer = {
+      controller: OuterController,
+      bindings: {
+        'prop1': '<'
+      },
+      template: '<inner prop2="$ctrl.b"></inner>'
+    };
+
+    const inner = {
+      controller: InnerController,
+      bindings: {
+        'prop2': '<'
+      }
+    };
+
+    createModule()
+      .component('outer', outer)
+      .component('inner', inner);
+
+    module('polyfill');
+
+    inject(($compile, $rootScope) => {
+      const element = $compile('<outer prop1="a"></outer>')($rootScope);
+
+      log = [];
+
+      $rootScope.$apply('a = 42');
+
+      expect(log).toEqual([
+        ['OuterController', {prop1: jasmine.objectContaining({currentValue: 42})}],
+        ['InnerController', {prop2: jasmine.objectContaining({currentValue: 84})}]
+      ]);
+    });
+  });
+
+
 //   it('should throw an error if `$onChanges()` hooks are not stable', () => {
 //
 //     class TestController {
