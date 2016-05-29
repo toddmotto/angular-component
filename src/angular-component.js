@@ -19,6 +19,19 @@
       return hijacked;
     }
 
+    class UNINITIALIZED_VALUE {}
+    let _UNINITIALIZED_VALUE = new UNINITIALIZED_VALUE();
+
+    class SimpleChange {
+      constructor(previous, current) {
+        this.previousValue = previous;
+        this.currentValue = current;
+      }
+      isFirstChange() {
+        return this.previousValue === _UNINITIALIZED_VALUE;
+      }
+    }
+
     let component = (name, options) => {
 
       let controller = options.controller || function () {};
@@ -103,30 +116,29 @@
             if (!changes) {
               changes = {};
             }
-            changes[key] = {
-              currentValue: newValue,
-              previousValue: changes[key] ? changes[key].currentValue : oldValue
-            };
+            if (changes[key]) {
+              oldValue = changes[key].currentValue;
+            }
+            changes[key] = new SimpleChange(oldValue, newValue);
             if (flush) {
               self.$onChanges(changes);
               changes = undefined;
             }
           }
 
-
           if (oneWayQueue.length) {
             let destroyQueue = [];
             for (let q = oneWayQueue.length; q--;) {
+
               let current = oneWayQueue[q];
-              let initialValue = $parse($attrs[current.attr])($scope.$parent);
+              let initialValue = self[current.local] = $parse($attrs[current.attr])($scope.$parent);
               self[current.local] = initialValue;
+
               let unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
                 self[current.local] = newValue;
                 updateChangeListener(current.local, newValue, oldValue, true);
               });
-              changes[current.local] = {
-                currentValue: initialValue
-              };
+              changes[current.local] = new SimpleChange(_UNINITIALIZED_VALUE, initialValue);
               destroyQueue.unshift(unbindParent);
               let unbindLocal = $scope.$watch(function () {
                 return self[current.local];

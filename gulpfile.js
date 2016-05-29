@@ -1,5 +1,5 @@
 var gulp    = require('gulp'),
-    babel = require('gulp-babel'),
+    babel   = require('gulp-babel'),
     jshint  = require('gulp-jshint'),
     header  = require('gulp-header'),
     uglify  = require('gulp-uglify'),
@@ -28,6 +28,10 @@ var banner = [
   ' */',
   '\n'
 ].join('');
+
+gulp.task('watch', function() {
+  gulp.watch(paths.scripts, ['scripts']);
+});
 
 gulp.task('scripts', ['clean'], function() {
   return gulp.src(paths.scripts)

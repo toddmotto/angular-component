@@ -1,6 +1,10 @@
 /*! angular-component v0.1.2 | (c) 2016 @toddmotto | https://github.com/toddmotto/angular-component */
 'use strict';
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 (function (angular) {
 
   var ng = angular.module;
@@ -21,6 +25,30 @@
     if (hijacked.component) {
       return hijacked;
     }
+
+    var UNINITIALIZED_VALUE = function UNINITIALIZED_VALUE() {
+      _classCallCheck(this, UNINITIALIZED_VALUE);
+    };
+
+    var _UNINITIALIZED_VALUE = new UNINITIALIZED_VALUE();
+
+    var SimpleChange = function () {
+      function SimpleChange(previous, current) {
+        _classCallCheck(this, SimpleChange);
+
+        this.previousValue = previous;
+        this.currentValue = current;
+      }
+
+      _createClass(SimpleChange, [{
+        key: 'isFirstChange',
+        value: function isFirstChange() {
+          return this.previousValue === _UNINITIALIZED_VALUE;
+        }
+      }]);
+
+      return SimpleChange;
+    }();
 
     var component = function component(name, options) {
 
@@ -107,10 +135,10 @@
             if (!changes) {
               changes = {};
             }
-            changes[key] = {
-              currentValue: newValue,
-              previousValue: changes[key] ? changes[key].currentValue : oldValue
-            };
+            if (changes[key]) {
+              oldValue = changes[key].currentValue;
+            }
+            changes[key] = new SimpleChange(oldValue, newValue);
             if (flush) {
               self.$onChanges(changes);
               changes = undefined;
@@ -122,16 +150,16 @@
               var destroyQueue = [];
 
               var _loop = function _loop(q) {
+
                 var current = oneWayQueue[q];
-                var initialValue = $parse($attrs[current.attr])($scope.$parent);
+                var initialValue = self[current.local] = $parse($attrs[current.attr])($scope.$parent);
                 self[current.local] = initialValue;
+
                 var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
                   self[current.local] = newValue;
                   updateChangeListener(current.local, newValue, oldValue, true);
                 });
-                changes[current.local] = {
-                  currentValue: initialValue
-                };
+                changes[current.local] = new SimpleChange(_UNINITIALIZED_VALUE, initialValue);
                 destroyQueue.unshift(unbindParent);
                 var unbindLocal = $scope.$watch(function () {
                   return self[current.local];
