@@ -122,18 +122,19 @@
               if (oneWayQueue.length) {
                 var destroyQueue = [];
                 for (var q = oneWayQueue.length; q--;) {
-                  var current = oneWayQueue[q];
-                  var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
-                    self[current.local] = newValue;
-                    updateChangeListener(current.local, newValue, oldValue, true);
-                  });
-                  destroyQueue.unshift(unbindParent);
-                  var unbindLocal = $scope.$watch(function () {
-                    return self[current.local];
-                  }, function (newValue, oldValue) {
-                    updateChangeListener(current.local, newValue, oldValue, false);
-                  });
-                  destroyQueue.unshift(unbindLocal);
+                  (function(current){
+                    var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
+                      self[current.local] = newValue;
+                      updateChangeListener(current.local, newValue, oldValue, true);
+                    });
+                    destroyQueue.unshift(unbindParent);
+                    var unbindLocal = $scope.$watch(function () {
+                      return self[current.local];
+                    }, function (newValue, oldValue) {
+                      updateChangeListener(current.local, newValue, oldValue, false);
+                    });
+                    destroyQueue.unshift(unbindLocal);
+                  })(oneWayQueue[q]);
                 }
                 $scope.$on('$destroy', function () {
                   for (var i = destroyQueue.length; i--;) {
