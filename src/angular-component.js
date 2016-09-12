@@ -102,7 +102,7 @@
                 self.$onChanges(changes);
                 changes = undefined;
               }
-              function updateChangeListener(key, newValue, oldValue, flush) {
+              function updateChangeListener(key, newValue, oldValue, flush, isFirstChange) {
                 if (typeof self.$onChanges === 'function') {
                   if (!changes) {
                     changes = {};
@@ -112,7 +112,10 @@
                   }
                   changes[key] = {
                     currentValue: newValue,
-                    previousValue: oldValue
+                    previousValue: oldValue,
+                    isFirstChange: function () {
+                      return isFirstChange;
+                    }
                   };
                   if (flush) {
                     triggerOnChanges();
@@ -123,15 +126,17 @@
                 var destroyQueue = [];
                 for (var q = oneWayQueue.length; q--;) {
                   (function(current){
+                    var isFirstChange = true;
                     var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
                       self[current.local] = newValue;
-                      updateChangeListener(current.local, newValue, oldValue, true);
+                      updateChangeListener(current.local, newValue, oldValue, true, isFirstChange);
+                      isFirstChange = false;
                     });
                     destroyQueue.unshift(unbindParent);
                     var unbindLocal = $scope.$watch(function () {
                       return self[current.local];
                     }, function (newValue, oldValue) {
-                      updateChangeListener(current.local, newValue, oldValue, false);
+                      updateChangeListener(current.local, newValue, oldValue, false, false);
                     });
                     destroyQueue.unshift(unbindLocal);
                   })(oneWayQueue[q]);

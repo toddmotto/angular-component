@@ -103,7 +103,7 @@
                 self.$onChanges(changes);
                 changes = undefined;
               }
-              function updateChangeListener(key, newValue, oldValue, flush) {
+              function updateChangeListener(key, newValue, oldValue, flush, isFirstChange) {
                 if (typeof self.$onChanges === 'function') {
                   if (!changes) {
                     changes = {};
@@ -113,7 +113,10 @@
                   }
                   changes[key] = {
                     currentValue: newValue,
-                    previousValue: oldValue
+                    previousValue: oldValue,
+                    isFirstChange: function () {
+                      return isFirstChange;
+                    }
                   };
                   if (flush) {
                     triggerOnChanges();
@@ -123,18 +126,21 @@
               if (oneWayQueue.length) {
                 var destroyQueue = [];
                 for (var q = oneWayQueue.length; q--;) {
-                  var current = oneWayQueue[q];
-                  var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
-                    self[current.local] = newValue;
-                    updateChangeListener(current.local, newValue, oldValue, true);
-                  });
-                  destroyQueue.unshift(unbindParent);
-                  var unbindLocal = $scope.$watch(function () {
-                    return self[current.local];
-                  }, function (newValue, oldValue) {
-                    updateChangeListener(current.local, newValue, oldValue, false);
-                  });
-                  destroyQueue.unshift(unbindLocal);
+                  (function(current){
+                    var isFirstChange = true;
+                    var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
+                      self[current.local] = newValue;
+                      updateChangeListener(current.local, newValue, oldValue, true, isFirstChange);
+                      isFirstChange = false;
+                    });
+                    destroyQueue.unshift(unbindParent);
+                    var unbindLocal = $scope.$watch(function () {
+                      return self[current.local];
+                    }, function (newValue, oldValue) {
+                      updateChangeListener(current.local, newValue, oldValue, false, false);
+                    });
+                    destroyQueue.unshift(unbindLocal);
+                  })(oneWayQueue[q]);
                 }
                 $scope.$on('$destroy', function () {
                   for (var i = destroyQueue.length; i--;) {
