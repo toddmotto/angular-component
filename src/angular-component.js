@@ -89,9 +89,6 @@
               for (var i = 0; i < ctrlNames.length; i++) {
                 self[ctrlNames[i]] = $ctrls[i + 1];
               }
-              if (typeof self.$onInit === 'function') {
-                self.$onInit();
-              }
               if (typeof self.$onDestroy === 'function') {
                 $scope.$on('$destroy', function () {
                   self.$onDestroy.call(self);
@@ -123,6 +120,7 @@
                 var destroyQueue = [];
                 for (var q = oneWayQueue.length; q--;) {
                   (function(current){
+                    self[current.local] = $scope.$parent.$eval($attrs[current.attr]);
                     var unbindParent = $scope.$parent.$watch($attrs[current.attr], function (newValue, oldValue) {
                       self[current.local] = newValue;
                       updateChangeListener(current.local, newValue, oldValue, true);
@@ -141,6 +139,9 @@
                     destroyQueue[i]();
                   }
                 });
+              }
+              if (typeof self.$onInit === 'function') {
+                self.$onInit();
               }
             },
             post: function ($scope, $element, $attrs, $ctrls) {
