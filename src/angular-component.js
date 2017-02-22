@@ -23,7 +23,6 @@
       function factory($injector) {
 
         function makeInjectable(fn) {
-          var closure;
           var isArray = angular.isArray(fn);
           if (angular.isFunction(fn) || isArray) {
             return function (tElement, tAttrs) {
