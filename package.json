@@ -6,6 +6,10 @@
   "author": "@toddmotto",
   "license": "MIT",
   "homepage": "https://github.com/toddmotto/angular-component",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toddmotto/angular-component.git"
+  },
   "devDependencies": {
     "gulp": "~3.9.0",
     "gulp-uglify": "~0.3.0",
